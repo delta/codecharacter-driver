@@ -7,8 +7,8 @@ use fs_extra::dir::CopyOptions;
 
 use crate::{
     create_error_response, error,
-    request::{GameParameters, NormalGameRequest, PlayerCode, PvPGameRequest},
-    response,
+    request::{GameParameters, NormalGameRequest, PlayerCode, PvPGameRequest, Language},
+    response::{self, GameStatus}, game_dir::GameDir,
 };
 
 pub fn copy_dir_all(
@@ -35,13 +35,7 @@ pub fn send_initial_parameters<'a>(
     game_parameters: &'a GameParameters,
 ) -> BufWriter<&'a File> {
     writer
-        .write_all(
-            format!(
-                "{} {}\n",
-                "5", "100"
-            )
-            .as_bytes(),
-        )
+        .write_all(format!("{} {}\n", "5", "1000").as_bytes())
         .unwrap();
     writer
         .write_all(format!("{}\n", game_parameters.attackers.len()).as_bytes())
@@ -129,4 +123,35 @@ pub fn make_copy(
         ));
     }
     None
+}
+
+pub fn copy_files(
+    game_id: &String,
+    player_code: &PlayerCode,
+    game_dir_handle: &GameDir,
+    game_type_dir: &String,
+    file_name: &String,
+) -> Option<GameStatus> {
+    let (to_copy_dir, player_code_file) = match player_code.language {
+        Language::CPP => (
+            format!("{}/{}", "player_code/cpp", game_type_dir),
+            format!("{}/{}.cpp", game_dir_handle.get_path(), file_name),
+        ),
+        Language::PYTHON => (
+            format!("{}/{}", "player_code/python", game_type_dir),
+            format!("{}/runpvp.py", game_dir_handle.get_path()),
+        ),
+        Language::JAVA => (
+            format!("{}/{}", "player_code/java", game_type_dir),
+            format!("{}/Run.java", game_dir_handle.get_path()),
+        ),
+    };
+
+    make_copy(
+        to_copy_dir.as_str(),
+        game_dir_handle.get_path(),
+        &player_code_file,
+        game_id,
+        player_code,
+    )
 }

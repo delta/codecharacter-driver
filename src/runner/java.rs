@@ -31,17 +31,10 @@ impl Runnable for Runner {
             .args([
                 "run",
                 &format!("--memory={}", "300m"),
-                &format!(
-                    "--memory-swap={}",
-                    "300m"
-                ),
+                &format!("--memory-swap={}", "300m"),
                 "--cpus=1.5",
                 "--ulimit",
-                &format!(
-                    "cpu={}:{}",
-                   "5",
-                   "5"
-                ),
+                &format!("cpu={}:{}", "5", "5"),
                 "--rm",
                 "--name",
                 &format!("{}_java_compiler", self.game_id),
@@ -87,17 +80,10 @@ impl Runnable for Runner {
             .args([
                 "run",
                 &format!("--memory={}", "100m"),
-                &format!(
-                    "--memory-swap={}",
-                    "100m"
-                ),
+                &format!("--memory-swap={}", "100m"),
                 "--cpus=1",
                 "--ulimit",
-                &format!(
-                    "cpu={}:{}",
-                    "10",
-                    "10"
-                ),
+                &format!("cpu={}:{}", "10", "10"),
                 "--rm",
                 "--name",
                 &format!("{}_java_runner", self.game_id),
@@ -122,5 +108,45 @@ impl Runnable for Runner {
                     "Couldnt spawn the java runner process: {err}"
                 ))
             })
+    }
+
+    fn run2(
+        &self,
+        stdin: File,
+        stdout: File,
+        game_type: GameType,
+    ) -> Result<Child, SimulatorError> {
+        return Ok(Command::new("docker")
+            .args([
+                "run",
+                &format!("--memory={}", "100m"),
+                &format!("--memory-swap={}", "100m"),
+                "--cpus=1",
+                "--ulimit",
+                &format!("cpu={}:{}", "10", "10"),
+                "--rm",
+                "--name",
+                &format!("{}_java_runner", self.game_id),
+                "-i",
+                "-v",
+                format!(
+                    "{}/{}.jar:/run.jar",
+                    self.current_dir.as_str(),
+                    self.file_name.as_str()
+                )
+                .as_str(),
+                "ghcr.io/delta/codecharacter-java-runner:latest",
+            ])
+            .create_pidfd(true)
+            .current_dir(&self.current_dir)
+            .stdin(stdin)
+            .stdout(stdout)
+            .stderr(Stdio::piped())
+            .spawn()
+            .map_err(|err| {
+                SimulatorError::UnidentifiedError(format!(
+                    "Couldnt spawn the java runner process: {err}"
+                ))
+            })?);
     }
 }

@@ -25,7 +25,7 @@ impl Simulator {
         p2_r: RawFd,
         p2_w: RawFd,
     ) -> Result<std::process::Child, SimulatorError> {
-        Command::new("/home/ram/Desktop/codecharacter-2023/codecharacter-simulator-2023/build/bin/main")
+        Command::new("/home/bhoopesh/codecharacter-simulator/build/bin/main")
             .args([
                 // "run",
                 // &format!("--memory={}", "100m"),
@@ -68,17 +68,10 @@ impl Simulator {
             .args([
                 "run",
                 &format!("--memory={}", "100m"),
-                &format!(
-                    "--memory-swap={}",
-                    "100m"
-                ),
+                &format!("--memory-swap={}", "100m"),
                 "--cpus=1",
                 "--ulimit",
-                &format!(
-                    "cpu={}:{}",
-                    "10",
-                    "10"
-                ),
+                &format!("cpu={}:{}", "10", "10"),
                 "--rm",
                 "--name",
                 &format!("{}_simulator", self.game_id),

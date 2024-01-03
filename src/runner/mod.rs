@@ -23,4 +23,6 @@ impl ToString for GameType {
 
 pub trait Runnable {
     fn run(&self, stdin: File, stdout: File, game_type: GameType) -> Result<Child, SimulatorError>;
+    fn run2(&self, stdin: File, stdout: File, game_type: GameType)
+        -> Result<Child, SimulatorError>;
 }

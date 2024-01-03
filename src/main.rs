@@ -1,5 +1,4 @@
-use std::env;
-use std::sync::Arc;
+use std::{env, sync::Arc };
 
 use cc_driver::{
     create_executing_response,
@@ -54,10 +53,10 @@ fn main() {
     let _handle = log4rs::init_config(config).unwrap();
 
     let res = consumer(
-        "amqp://guest:guest@localhost".to_owned(),
-        "gameRequestQueue".to_owned(),
-        "gamePvpRequestQueue".to_owned(),
-        "gameStatusUpdateQueue".to_owned(),
+        env::var("RABBIT_MQ_HOST").unwrap(),
+        env::var("NORMAL_GAME_REQUEST_QUEUE").unwrap(),
+        env::var("PVP_GAME_REQUEST_QUEUE").unwrap(),
+        env::var("GAME_RESPONSE_QUEUE").unwrap(),
         worker_fn,
     );
 

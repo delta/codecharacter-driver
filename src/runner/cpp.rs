@@ -5,6 +5,8 @@ use std::{
     process::{Child, Command, Stdio},
 };
 
+use log::info;
+
 use crate::error::SimulatorError;
 
 use super::{GameType, Runnable};
@@ -81,7 +83,65 @@ impl Runnable for Runner {
         //     return Err(SimulatorError::CompilationError(stderr));
         // }
 
-        Command::new("/home/ram/Desktop/codecharacter-2023/codecharacter-driver-2023/player_code/cpp/run")
+        info!("Running the C++ runner process");
+
+        Command::new("/home/bhoopesh/Desktop/codecharacter-driver-2023/player_code/cpp/pvp_game/player_1/run")
+            .args([
+                // "run",
+                // &format!("--memory={}", "100m"),
+                // &format!(
+                //     "--memory-swap={}",
+                //     "100m"
+                // ),
+                // "--cpus=1",
+                // "--ulimit",
+                // &format!(
+                //     "cpu={}:{}",
+                //     "10",
+                //     "10"
+                // ),
+                // "--rm",
+                // "--name",
+                // &format!("{}_{}_cpp_runner", self.game_id, self.file_name),
+                // "-i",
+                // "-v",
+                // &format!(
+                //     "{}/{}:/player_code",
+                //     self.current_dir.as_str(),
+                //     self.file_name.as_str()
+                // ),
+                // "-v",
+                // format!(
+                //     "{}/run.cpp:/out.txt",
+                //     self.current_dir.as_str()
+                // )
+                // .as_str(),
+                // "ghcr.io/delta/codecharacter-cpp-runner:latest",
+                // pass the type of game we want to execute
+                &game_type.to_string(),
+            ])
+            .current_dir(&self.current_dir)
+            .create_pidfd(true)
+            .stdin(stdin)
+            .stdout(stdout)
+            .stderr(Stdio::piped())
+            .spawn()
+            .map_err(|err| {
+                SimulatorError::UnidentifiedError(format!(
+                    "Couldnt spawn the C++ runner process: {err}"
+                ))
+            })
+    }
+
+    fn run2(
+        &self,
+        stdin: File,
+        stdout: File,
+        game_type: GameType,
+    ) -> Result<Child, SimulatorError> {
+        info!("Running the C++ runner process 2");
+
+        Command::new("/home/bhoopesh/Desktop/codecharacter-driver-2023/player_code/cpp/pvp_game/player_2/run")
             .args([
                 // "run",
                 // &format!("--memory={}", "100m"),
