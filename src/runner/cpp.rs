@@ -7,24 +7,26 @@ use std::{
 
 use crate::error::SimulatorError;
 
-use super::Runnable;
+use super::{GameType, Runnable};
 
 pub struct Runner {
     current_dir: String,
     game_id: String,
+    player_dir: String,
 }
 
 impl Runner {
-    pub fn new(current_dir: String, game_id: String) -> Self {
+    pub fn new(current_dir: String, game_id: String, player_dir: String) -> Self {
         Runner {
             current_dir,
             game_id,
+            player_dir,
         }
     }
 }
 
 impl Runnable for Runner {
-    fn run(&self, stdin: File, stdout: File) -> Result<Child, SimulatorError> {
+    fn run(&self, stdin: File, stdout: File, game_type: GameType) -> Result<Child, SimulatorError> {
         let compile = Command::new("docker")
             .args([
                 "run",
@@ -42,9 +44,9 @@ impl Runnable for Runner {
                 ),
                 "--rm",
                 "--name",
-                &format!("{}_cpp_compiler", self.game_id),
+                &format!("{}_{}_cpp_compiler", self.game_id, self.player_dir.replace("/", "_")),
                 "-v",
-                format!("{}/:/player_code/", self.current_dir.as_str()).as_str(),
+                format!("{}/{}/:/player_code/", self.current_dir, self.player_dir).as_str(),
                 &env::var("CPP_COMPILER_IMAGE").unwrap(),
             ])
             .current_dir(&self.current_dir)
@@ -85,11 +87,12 @@ impl Runnable for Runner {
                 ),
                 "--rm",
                 "--name",
-                &format!("{}_cpp_runner", self.game_id),
+                &format!("{}_{}_cpp_runner", self.game_id, self.player_dir.replace("/", "_")),
                 "-i",
                 "-v",
-                format!("{}/run:/player_code", self.current_dir.as_str()).as_str(),
+                format!("{}/{}/run:/player_code", self.current_dir, self.player_dir).as_str(),
                 &env::var("CPP_RUNNER_IMAGE").unwrap(),
+                &game_type.to_string()
             ])
             .current_dir(&self.current_dir)
             .create_pidfd(true)
