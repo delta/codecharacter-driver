@@ -227,7 +227,7 @@ impl Handler for NormalGameRequest {
                                             )
                                         }
                                         _ => {
-                                            return create_normal_error_response(self.game_id, SimulatorError::RuntimeError("couldnt communicate with simulator check syntax".to_owned()));
+                                            return create_normal_error_response(self.game_id, SimulatorError::RuntimeError(format!("couldnt communicate with simulator check syntax \n {}", process.output())));
                                         }
                                     }
                                 }
